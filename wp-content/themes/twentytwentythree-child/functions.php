@@ -1,4 +1,6 @@
 <?php
+include __DIR__ . '/product/Product.php';
+
 /* enqueue scripts and style from parent theme */
 
 function twentytwentythree_styles()
@@ -19,3 +21,4 @@ function remove_admin_bar_for_wp_test()
 }
 
 add_action('after_setup_theme', 'remove_admin_bar_for_wp_test');
+

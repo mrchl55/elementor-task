@@ -7,9 +7,11 @@ class Product
     {
         add_action('init', array($this, 'add_product_cpt'));
         add_action('admin_init', array($this, 'register_meta_boxes'));
-        add_action('save_post', array($this, 'save'));
-        add_action('admin_footer', array($this, 'wpdocs_theme_name_scripts'));
+        add_action('save_post', array($this, 'save_product'));
+        add_action('admin_footer', array($this, 'product_scripts'));
         add_action('init', array($this, 'register_shortcodes'));
+        add_action('rest_api_init', array($this, 'register_products_api'));
+
     }
 
     function add_product_cpt()
@@ -22,13 +24,14 @@ class Product
                 ),
                 'public' => true,
                 'has_archive' => true,
-                'supports' => array('title', 'excerpt', 'thumbnail', 'custom-fields')
+                'supports' => array('title', 'excerpt', 'thumbnail', 'custom-fields'),
+                'show_in_rest' => true,
 
             )
         );
         $labels = array(
-            'name' => _x('Categories', 'taxonomy general name'),
-            'singular_name' => _x('Category', 'taxonomy singular name'),
+            'name' => __('Categories'),
+            'singular_name' => __('Category'),
             'search_items' => __('Search Category'),
             'all_items' => __('All Categories'),
             'parent_item' => __('Parent Categories'),
@@ -194,7 +197,7 @@ class Product
         <?php
     }
 
-    function wpdocs_theme_name_scripts()
+    function product_scripts()
     {
 
         wp_enqueue_media();
@@ -206,6 +209,7 @@ class Product
         wp_register_script('url-validate', get_stylesheet_directory_uri()
             . '/product/js/url-validate.js', array('jquery'), '2.0.0', true);
         wp_enqueue_script('url-validate');
+
     }
 
     function shortcode_product_box($atts)
@@ -246,7 +250,60 @@ class Product
         add_shortcode('product_box', array($this, 'shortcode_product_box'));
     }
 
-    public function save($post_id)
+    function register_products_api()
+    {
+        register_rest_route('products', '/list', [
+            'methods' => 'POST',
+            'callback' => array($this, 'get_products'),
+
+        ]);
+    }
+
+    function get_products(WP_REST_Request $request)
+    {
+        $cat_id = $request->get_param('cat_id');
+        $products = get_posts([
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'tax_query' => array(
+                array(
+                    'taxonomy' => 'category',
+                    'field' => 'id',
+                    'terms' => $cat_id,
+                    'operator' => 'IN'
+                )),
+        ]);
+
+        if (!count($products)) {
+            return new WP_REST_Response(
+                'No products found',
+                409
+            );
+        }
+        $products_array = [];
+        foreach ($products as $key => $product) {
+            $ID = $product->ID;
+            $title = get_the_title($ID);
+            $description = get_the_excerpt($ID);
+            $main_image = get_the_post_thumbnail_url($ID);
+            $price = get_post_meta($ID, '_product_price', true);
+            $sale_price = get_post_meta($ID, '_product_sale_price', true);
+            $is_on_sale = get_post_meta($ID, '_product_is_on_sale', true);
+            $product_item = array(
+                'title' => $title,
+                'description' => $description,
+                'main_image' => $main_image,
+                'price' => $price,
+                'sale_price' => $sale_price,
+                'is_on_sale' => $is_on_sale,
+            );
+            $products_array[$key] = $product_item;
+        }
+        $products_json = json_encode($products_array);
+        return $products_json;
+    }
+
+    public function save_product($post_id)
     {
 
 

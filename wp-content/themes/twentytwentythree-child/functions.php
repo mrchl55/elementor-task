@@ -8,6 +8,9 @@ function twentytwentythree_styles()
     wp_enqueue_style('child-style', get_stylesheet_uri(),
         array('twenty-twenty-three-style'), wp_get_theme()->
         get('Version'));
+    wp_register_script('api-test', get_stylesheet_directory_uri()
+        . '/product/js/api-test.js', array('jquery'), '2.0.0', true);
+    wp_enqueue_script('api-test');
 }
 
 add_action('wp_enqueue_scripts', 'twentytwentythree_styles');

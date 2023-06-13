@@ -5,9 +5,6 @@ class Product
 
     public function __construct()
     {
-//        if ($product->post_type !== 'product') {
-//            throw new Error('Not a product instance');
-//        }
         add_action('init', array($this, 'add_product_cpt'));
         add_action('admin_init', array($this, 'register_meta_boxes'));
         add_action('save_post', array($this, 'save'));
@@ -104,11 +101,7 @@ class Product
     {
 
         wp_nonce_field('product_custom_box', 'product_custom_box_nonce');
-
-        // Use get_post_meta to retrieve an existing value from the database.
         $price = get_post_meta($post->ID, '_product_price', true);
-
-        // Display the form, using the current value.
         ?>
         <label for="price_field">
             <?php _e('Price in $', 'textdomain'); ?>
@@ -123,14 +116,8 @@ class Product
 
     public function render_sale_price_meta_box($post)
     {
-
-        // Add an nonce field so we can check for it later.
         wp_nonce_field('product_custom_box', 'product_custom_box_nonce');
-
-        // Use get_post_meta to retrieve an existing value from the database.
         $sale_price = get_post_meta($post->ID, '_product_sale_price', true);
-
-        // Display the form, using the current value.
         ?>
 
         <label for="sale_price_field">
@@ -145,14 +132,8 @@ class Product
 
     public function render_yt_video_meta_box($post)
     {
-
-        // Add an nonce field so we can check for it later.
         wp_nonce_field('product_custom_box', 'product_custom_box_nonce');
-
-        // Use get_post_meta to retrieve an existing value from the database.
         $yt_video = get_post_meta($post->ID, '_product_yt_video', true);
-
-        // Display the form, using the current value.
         ?>
 
         <label for="yt_video_field">
@@ -169,7 +150,6 @@ class Product
     {
         wp_nonce_field('product_custom_box', 'product_custom_box_nonce');
         $is_on_sale = get_post_meta($post->ID, '_product_is_on_sale', true);
-
         ?>
 
         <label for="is_on_sale_field">
@@ -192,25 +172,11 @@ class Product
             <?php
             $image_ids = ($image_ids = get_post_meta($post_id, '_product_gallery', true)) ? explode(',', $image_ids) : array();
 
-            foreach ($image_ids as $i => &$id) {
-                $url = wp_get_attachment_image_url($id, array(80, 80));
-                if ($url) {
-                    ?>
-                    <li data-id="<?php echo $id ?>">
-                        <span style="background-image:url('<?php echo $url ?>')"></span>
-                        <a href="#" class="product-gallery-remove">&times;</a>
-                    </li>
-                    <?php
-                } else {
-                    unset($image_ids[$i]);
-                }
-            }
+
             ?>
         </ul>
 
         <input type="hidden" name="gallery_field" value="<?php echo join(',', $image_ids) ?>"/>
-        <!--        <input type="hidden" name="gallery_field" value="--><?php //echo $image_ids
-        ?><!--" />-->
         <a href="#" class="button product-upload-button">Add Images</a>
 
         <?php
@@ -218,9 +184,10 @@ class Product
 
     function wpdocs_theme_name_scripts()
     {
+
+        wp_enqueue_media();
         wp_enqueue_style('product-gallery', get_stylesheet_directory_uri()
             . '/product/styles/product-gallery.css',);
-        wp_enqueue_media();
         wp_register_script('product-gallery', get_stylesheet_directory_uri()
             . '/product/js/product-gallery.js', array('jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-sortable'), '2.0.0', true);
         wp_enqueue_script('product-gallery');
@@ -239,7 +206,6 @@ class Product
 
         $nonce = $_POST['product_custom_box_nonce'];
 
-        // Verify that the nonce is valid.
         if (!wp_verify_nonce($nonce, 'product_custom_box')) {
             return $post_id;
         }
@@ -263,9 +229,6 @@ class Product
         $is_on_sale = $_POST['is_on_sale_field'];
         $gallery = $_POST['gallery_field'];
         $yt_video = sanitize_text_field($_POST['yt_video_field']);
-//        if (!empty($yt_video) && filter_var($yt_video, FILTER_VALIDATE_URL) === FALSE) {
-//            return $post_id;
-//        }
         update_post_meta($post_id, '_product_price', $price);
         update_post_meta($post_id, '_product_sale_price', $sale_price);
         update_post_meta($post_id, '_product_is_on_sale', $is_on_sale);

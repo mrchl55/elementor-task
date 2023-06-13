@@ -213,12 +213,20 @@ class Product
         $atts = shortcode_atts(array(
             'id' => 0,
             'bg_color' => '',
+            'custom_output' => '',
         ), $atts);
         if (empty($atts['id'])) {
             return false;
         }
         wp_enqueue_style('product-box', get_stylesheet_directory_uri()
             . '/product/styles/product-box.css',);
+        add_filter('do_shortcode_tag', function ($output, $tag, $attr) {
+            if (empty($attr['custom_output'])) {
+                return $output;
+            }
+            return $attr['custom_output'];
+        }, 10, 3);
+
         $product_post = get_post($atts['id']);
         $ID = $product_post->ID;
         $title = $product_post->post_title;
@@ -229,7 +237,7 @@ class Product
         $output .= '<div class="product-box__title">' . $title . '</div>';
         $output .= '<div class="product-box__price">' . $price . '</div>';
         $output .= '</div>';
-        echo $output;
+        return $output;
         wp_reset_postdata();
     }
 

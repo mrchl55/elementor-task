@@ -26,3 +26,14 @@ add_action('wp_head', function () {
     echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
 
 });
+
+function address_mobile_address_bar()
+{
+    $color = "#444444";
+    echo '<meta name="theme-color" content="' . $color . '">';
+    echo '<meta name="msapplication-navbutton-color" content="' . $color . '">';
+    echo '<meta name="apple-mobile-web-app-capable" content="yes">';
+    echo '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">';
+}
+
+add_action('wp_head', 'address_mobile_address_bar');

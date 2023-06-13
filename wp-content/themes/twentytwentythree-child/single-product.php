@@ -6,6 +6,8 @@ add_action('wp_enqueue_scripts', function () {
 });
 
 get_header();
+
+echo do_shortcode('[product_box id="38" bg_color="red" custom_output="hehe"]');
 ?>
 
     <div id="primary" class="content-area">

@@ -22,3 +22,7 @@ function remove_admin_bar_for_wp_test()
 
 add_action('after_setup_theme', 'remove_admin_bar_for_wp_test');
 
+add_action('wp_head', function () {
+    echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+
+});

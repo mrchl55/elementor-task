@@ -6,7 +6,6 @@ $( '.product-upload-button' ).on( 'click', function( event ){ // button click
     event.preventDefault();
 
     const button = $(this)
-    // we are going to use <input type="hidden"> to store image IDs, comma separated
     const hiddenField = button.prev()
     const hiddenFieldValue = hiddenField.val().split( ',' )
 
@@ -20,28 +19,21 @@ $( '.product-upload-button' ).on( 'click', function( event ){ // button click
         },
         multiple: true
     }).on( 'select', function() {
-        // get selected images and rearrange the array
         let selectedImages = customUploader.state().get( 'selection' ).map( item => {
             item.toJSON();
             return item;
         } )
 
         selectedImages.map( image => {
-            // add every selected image to the <ul> list
             $( '.product-gallery' ).append( '<li data-id="' + image.id + '"><span style="background-image:url(' + image.attributes.url + ')"></span><a href="#" class="product-gallery-remove">×</a></li>' );
-            // and to hidden field
             hiddenFieldValue.push( image.id )
         } );
-
-        // refresh sortable
         $( '.product-gallery' ).sortable( 'refresh' );
-        // add the IDs to the hidden field value
         hiddenField.val( hiddenFieldValue.join() );
 
     }).open();
 });
 
-// remove image event
 $( 'body' ).on('click', 'a.product-gallery-remove',  function( event ){
 
     event.preventDefault();
@@ -52,23 +44,22 @@ $( 'body' ).on('click', 'a.product-gallery-remove',  function( event ){
     const container = button.parent().parent()
     const hiddenField = container.next()
     console.log(container.parent())
-    // const hiddenFieldValue = hiddenField.val().split(",")
-    const hiddenFieldValue = ((hiddenField.val().indexOf(',') !== -1)
-        ? hiddenField.val().split(',')
-        : (hiddenField.val().length > 0)
-            ? [hiddenField.val()]
-            : []);
+    console.log(typeof hiddenField.val())
+    const hiddenFieldValue = hiddenField.val().split(",").map( Number );
     const i = hiddenFieldValue.indexOf( imageId )
 
     button.parent().remove();
-
+console.log(imageId, i, hiddenFieldValue)
     // remove certain array element
     if( i != -1 ) {
+
         hiddenFieldValue.splice(i, 1);
     }
 
     // add the IDs to the hidden field value
+    console.log('before', hiddenField.val())
     hiddenField.val( hiddenFieldValue.join() );
+    console.log('after', hiddenField.val())
 
     // refresh sortable
     container.sortable( 'refresh' );

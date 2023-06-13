@@ -172,7 +172,19 @@ class Product
             <?php
             $image_ids = ($image_ids = get_post_meta($post_id, '_product_gallery', true)) ? explode(',', $image_ids) : array();
 
-
+            foreach ($image_ids as $i => &$id) {
+                $url = wp_get_attachment_image_url($id, array(80, 80));
+                if ($url) {
+                    ?>
+                    <li data-id="<?php echo $id ?>">
+                        <span style="background-image:url('<?php echo $url ?>')"></span>
+                        <a href="#" class="product-gallery-remove">&times;</a>
+                    </li>
+                    <?php
+                } else {
+                    unset($image_ids[$i]);
+                }
+            }
             ?>
         </ul>
 

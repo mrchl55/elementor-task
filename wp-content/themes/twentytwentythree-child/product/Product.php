@@ -9,7 +9,7 @@ class Product
         add_action('admin_init', array($this, 'register_meta_boxes'));
         add_action('save_post', array($this, 'save'));
         add_action('admin_footer', array($this, 'wpdocs_theme_name_scripts'));
-
+        add_action('init', array($this, 'register_shortcodes'));
     }
 
     function add_product_cpt()
@@ -206,6 +206,36 @@ class Product
         wp_register_script('url-validate', get_stylesheet_directory_uri()
             . '/product/js/url-validate.js', array('jquery'), '2.0.0', true);
         wp_enqueue_script('url-validate');
+    }
+
+    function shortcode_product_box($atts)
+    {
+        $atts = shortcode_atts(array(
+            'id' => 0,
+            'bg_color' => '',
+        ), $atts);
+        if (empty($atts['id'])) {
+            return false;
+        }
+        wp_enqueue_style('product-box', get_stylesheet_directory_uri()
+            . '/product/styles/product-box.css',);
+        $product_post = get_post($atts['id']);
+        $ID = $product_post->ID;
+        $title = $product_post->post_title;
+        $price = get_post_meta($ID, '_product_price', true);
+        $main_image = get_the_post_thumbnail_url($ID);
+        $output = '<div class="product-box" style="--bg-color: ' . $atts['bg_color'] . '">';
+        $output .= '<div class="product-box__image"><img src="' . $main_image . '"/></div>';
+        $output .= '<div class="product-box__title">' . $title . '</div>';
+        $output .= '<div class="product-box__price">' . $price . '</div>';
+        $output .= '</div>';
+        echo $output;
+        wp_reset_postdata();
+    }
+
+    function register_shortcodes()
+    {
+        add_shortcode('product_box', array($this, 'shortcode_product_box'));
     }
 
     public function save($post_id)

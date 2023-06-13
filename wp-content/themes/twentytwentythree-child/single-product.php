@@ -6,7 +6,6 @@ add_action('wp_enqueue_scripts', function () {
 });
 
 get_header();
-
 ?>
 
     <div id="primary" class="content-area">
@@ -97,7 +96,7 @@ get_header();
                             'taxonomy' => 'category',
                             'field' => 'id',
                             'terms' => $term_ids,
-                            'operator' => 'IN' 
+                            'operator' => 'IN'
                         )),
                     'posts_per_page' => 3,
                     'ignore_sticky_posts' => 1,

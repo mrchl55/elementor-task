@@ -21,17 +21,50 @@ get_header();
             $sale_price = get_post_meta($ID, '_product_sale_price', true);
             $is_on_sale = get_post_meta($ID, '_product_is_on_sale', true);
             $gallery = get_post_meta($ID, '_product_gallery', true);
-            var_dump($main_image);
+            $yt_video = get_post_meta($ID, '_product_yt_video', true);
+            function getYoutubeEmbedUrl($url)
+            {
+                $shortUrlRegex = '/youtu.be\/([a-zA-Z0-9_-]+)\??/i';
+                $longUrlRegex = '/youtube.com\/((?:embed)|(?:watch))((?:\?v\=)|(?:\/))([a-zA-Z0-9_-]+)/i';
+
+                if (preg_match($longUrlRegex, $url, $matches)) {
+                    $youtube_id = $matches[count($matches) - 1];
+                }
+
+                if (preg_match($shortUrlRegex, $url, $matches)) {
+                    $youtube_id = $matches[count($matches) - 1];
+                }
+                return 'https://www.youtube.com/embed/' . $youtube_id;
+            }
+
             ?>
             <div class="single-product__wrapper <?php echo($is_on_sale ? 'on-sale' : '') ?>">
                 <div class="single-product__image"><img
                             src="<?php echo $main_image ?: get_stylesheet_directory_uri() . '/images/nophoto.jpg'; ?>"/>
                 </div>
                 <h2 class="single-product__title"><?php echo $title; ?></h2>
-                <div class="single-product__description"><?php echo $description; ?></div>
-                <div class="single-product__price"><?php echo $price; ?></div>
-                <div class="single-product__sale-price"><?php echo $sale_price; ?></div>
+                <div class="single-product__description">
+                    <p> <?php echo $description; ?></p>
+                    <?php if (!empty($yt_video)):
+
+                        $yt_video_embed = getYoutubeEmbedUrl($yt_video);
+                        ?>
+                        <iframe width="400px" height="300px" src="<?php echo $yt_video_embed; ?>"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen></iframe>
+                    <?php
+                    endif;
+                    ?>
+                </div>
+                <div class="single-product__price"><?php echo $price; ?>$</div>
                 <?php
+                if (!empty($sale_price)):
+                    ?>
+                    <div class="single-product__sale-price">Now only <?php echo $sale_price; ?>$</div>
+
+                <?php
+                endif;
                 $image_ids = ($image_ids = get_post_meta($ID, '_product_gallery', true)) ? explode(',', $image_ids) : array();
                 if (!empty($image_ids)):
                 ?>

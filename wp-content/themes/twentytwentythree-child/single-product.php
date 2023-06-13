@@ -87,7 +87,52 @@ get_header();
                     endif;
                     ?>
                 </div>
+                <?php
+                $terms = get_the_terms($ID, 'category', 'string');
+                $term_ids = wp_list_pluck($terms, 'term_id');
+                $related_posts_query = new WP_Query(array(
+                    'post_type' => 'product',
+                    'tax_query' => array(
+                        array(
+                            'taxonomy' => 'category',
+                            'field' => 'id',
+                            'terms' => $term_ids,
+                            'operator' => 'IN' 
+                        )),
+                    'posts_per_page' => 3,
+                    'ignore_sticky_posts' => 1,
+                    'orderby' => 'rand',
+                    'post__not_in' => array($ID)
+                ));
 
+                if ($related_posts_query->have_posts()) {
+                    ?>
+                    <h4>You also may like</h4>
+                    <div class="single-product__related-products">
+                        <?php
+                        while ($related_posts_query->have_posts()) : $related_posts_query->the_post();
+                            $related_post_ID = get_the_ID();
+                            $related_post_title = get_the_title();
+                            $related_post_link = get_the_permalink();
+                            $related_post_main_image = get_the_post_thumbnail_url();
+                            ?>
+                            <div class="single-product__related-product">
+                                <?php if (!empty($related_post_main_image)) { ?>
+                                    <a href="<?php echo $related_post_link ?>"
+                                       title="<?php echo $related_post_title; ?>"> <img
+                                                src="<?php echo $related_post_main_image; ?>"/> </a>
+                                <?php } else { ?>
+                                    <a href="<?php echo $related_post_link; ?>"
+                                       title="<?php echo $related_post_title; ?>"><?php echo $related_post_title; ?></a>
+                                <?php } ?>
+                            </div>
+                        <?php endwhile;
+                        wp_reset_query();
+                        ?>
+                    </div>
+                    <?php
+                }
+                ?>
             </div>
 
         </main>
